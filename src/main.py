@@ -1,6 +1,6 @@
 import logging
 import re
-from collections import Counter
+from collections import defaultdict
 from urllib.parse import urljoin
 
 import requests_cache
@@ -98,16 +98,15 @@ def pep(session):
     section_tag = find_tag(soup, 'section', attrs={'id': 'numerical-index'})
     table_tag = find_tag(section_tag, 'table')
     tbody_tag = find_tag(table_tag, 'tbody')
-    status_count = Counter()
+    tr_tags = tbody_tag.find_all('tr')
+    status_count = defaultdict(int)
     result = [('Статус', 'Количество')]
     mismatched_status_peps = []
-    peps_total = 0
-    for tr_tag in tqdm(tbody_tag.find_all('tr')):
+    for tr_tag in tqdm(tr_tags):
         pep_status = find_tag(tr_tag, 'abbr').text[1:]
         pep_url = urljoin(PEPS_URL, find_tag(tr_tag, 'a')['href'])
         pep_page_status = str(get_pep_page_status(session, pep_url))
         status_count[pep_page_status] += 1
-        peps_total += 1
         if pep_page_status not in EXPECTED_STATUS[pep_status]:
             mismatched_status_peps.append(
                 (pep_url, pep_status, pep_page_status)
@@ -122,8 +121,8 @@ def pep(session):
                 f'Ожидаемые статусы: [{expected_status}]\n'
             )
         logging.warn(log)
-    result += status_count.most_common()
-    result.append(('Total', peps_total))
+    result += status_count.items()
+    result.append(('Total', len(tr_tags)))
     return result
 
 

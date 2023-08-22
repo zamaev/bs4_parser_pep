@@ -5,6 +5,9 @@ PEPS_URL = 'https://peps.python.org/'
 BASE_DIR = Path(__file__).parent
 DATETIME_FORMAT = '%Y-%m-%d_%H-%M-%S'
 
+OUTPUT_PRETTY = 'pretty'
+OUTPUT_FILE = 'file'
+
 EXPECTED_STATUS = {
     'A': ('Active', 'Accepted'),
     'D': ('Deferred',),
